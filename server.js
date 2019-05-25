@@ -30,7 +30,7 @@ app.use(session({
   resave: true,
   saveUninitialized: true,
   cookie: {
-    secure: true,
+    secure: false,
     expires: new Date(Date.now() + 60 * 60 * 1000)
   },
   store: new MongoStore({
@@ -54,7 +54,7 @@ router.get("/", function (req, res) {
   });
 });
 
-router.post("/login", [
+  router.post("/login", [
     check("id").not().isEmpty().withMessage("Please provide login id.").trim().escape(),
     check("password").not().isEmpty().withMessage("Please provide login password.").trim().escape(),
   ], async (req, res) => {
@@ -83,6 +83,12 @@ router.post("/login", [
       res.status(400).send({ message: "Bad Request!", error: e})
     }
   })
+
+  router.get("/logout", (req, res) => {
+    req.session.destroy()
+    res.status(200).send({ success: "Logged out!"})
+  })
+
 // add inventory item to backend database
 router
   .route("/cash")
