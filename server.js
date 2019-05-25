@@ -5,7 +5,7 @@ var mongoose = require("mongoose");
 var session = require("express-session")
 const db = require("./app/mongoose.js")
 const MongoStore = require("connect-mongo")(session)
-var Details = require("./app/modules/inventoryitem");
+var Detail = require("./app/modules/inventoryitem");
 var Admin  = require("./app/modules/adminModel");
 const { isAdminLoggedIn } = require("./app/middleware/auth.js")
 const { check, validationResult } = require("express-validator/check");
@@ -62,7 +62,7 @@ router.get("/", function (req, res) {
     if(req.session.admin) {
       return res.json({ message: "Already Logged In!"})
     }
-    console.log(req.session)
+
     const errors = validationResult(req)
 
     if(!errors.isEmpty()){
@@ -91,28 +91,24 @@ router.get("/", function (req, res) {
 // add inventory item to backend database
 router
   .route("/cash")
-  .post(isAdminLoggedIn, function (req, res) {
-    var casht = new Details();
-    casht.mobile_no = req.body.mobile_no;
-    casht.inventory_name = req.body.inventory_name;
-    casht.inventory_category = req.body.inventory_category;
-    casht.inventory_qty = req.body.inventory_qty;
-    casht.inventory_cost = req.body.inventory_cost;
+  .post(isAdminLoggedIn, async function (req, res) {
+    try{
+      var casht = new Details();
+      casht.mobile_no = req.body.mobile_no;
+      casht.inventory_name = req.body.inventory_name;
+      casht.inventory_category = req.body.inventory_category;
+      casht.inventory_qty = req.body.inventory_qty;
+      casht.inventory_cost = req.body.inventory_cost;
 
-    db
-      .collection("inventory_details")
-      .find({})
-      .toArray(function (err, result) {
-        if (err) {
-          res.send(err);
-        }
-        res.json({
-          message: "Cash Transcation is successfully Add"
-        });
-      });
+      await casht.save()
+      
+      res.json(casht)
+    } catch(e) {
+      res.status(400).send({ message: "Something went wrong!", error: e})
+    }
   })
   .get(function (req, res) {
-    Details.find(function (err, details) {
+    Detail.find(function (err, details) {
       if (err) {
         res.send(err);
       }
@@ -120,17 +116,13 @@ router
     }); 
   });
 
-router.route("/cash/mobile_no/:mobile_no").get(isAdminLoggedIn, function (req, res) {
-  Details.find({
-      mobile_no: req.params.bname
-    },
-    function (err, detail) {
-      if (err) {
-        res.send(err);
-      }
-      res.json(detail.bname);
+router.route("/cash/mobile_no/:mobile_no").get(isAdminLoggedIn, async function (req, res) {
+  try{
+      const casht = await Detail.findOne({ mobile_no: req.body.mobile_no })
+      res.json(casht)
+    } catch(e) {
+      res.status(400).send({ message: "Something went wrong!", error: e})
     }
-  );
 });
 // Fire up server
 app.listen(port);
