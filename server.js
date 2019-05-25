@@ -93,7 +93,7 @@ router
   .route("/cash")
   .post(isAdminLoggedIn, async function (req, res) {
     try{
-      var casht = new Details();
+      var casht = new Detail();
       casht.mobile_no = req.body.mobile_no;
       casht.inventory_name = req.body.inventory_name;
       casht.inventory_category = req.body.inventory_category;
@@ -119,6 +119,15 @@ router
 router.route("/cash/mobile_no/:mobile_no").get(isAdminLoggedIn, async function (req, res) {
   try{
       const casht = await Detail.findOne({ mobile_no: req.body.mobile_no })
+      res.json(casht)
+    } catch(e) {
+      res.status(400).send({ message: "Something went wrong!", error: e})
+    }
+});
+
+router.route("/cash").get(isAdminLoggedIn, async function (req, res) {
+  try{
+      const casht = await Detail.find()
       res.json(casht)
     } catch(e) {
       res.status(400).send({ message: "Something went wrong!", error: e})
