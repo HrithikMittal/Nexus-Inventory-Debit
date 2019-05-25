@@ -76,7 +76,6 @@ router.get("/", function (req, res) {
     }
 
     req.session.admin = admin
-    console.log(req.session)
     res.status(200).send({ success: "Admin Logged In!"})
 
     } catch(e) {
